@@ -1,10 +1,21 @@
 import Head from 'next/head';
 import { GetStaticProps } from 'next/types';
-import Prismic from '@prismicio/client';
+import { RichText } from 'prismic-dom';
 import { createClient } from '../../services/prismic';
 import styles from './posts.module.scss';
 
-export default function Posts(): JSX.Element {
+type Post = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  updatedAt: string;
+};
+
+interface PostsProps {
+  posts: Post[];
+}
+
+export default function Posts({ posts }: PostsProps): JSX.Element {
   return (
     <>
       <Head>
@@ -13,30 +24,13 @@ export default function Posts(): JSX.Element {
 
       <main className={styles.container}>
         <div className={styles.posts}>
-          <a href="/posts">
-            <time>12 de março de 2022</time>
-            <strong>Creating a Monorepo with lerna & Yarn Workspaces</strong>
-            <p>
-              In this guide, you will learn how to create a Monorepo to manage
-              multiple packages with a shared
-            </p>
-          </a>
-          <a href="/posts">
-            <time>12 de março de 2022</time>
-            <strong>Creating a Monorepo with lerna & Yarn Workspaces</strong>
-            <p>
-              In this guide, you will learn how to create a Monorepo to manage
-              multiple packages with a shared
-            </p>
-          </a>
-          <a href="/posts">
-            <time>12 de março de 2022</time>
-            <strong>Creating a Monorepo with lerna & Yarn Workspaces</strong>
-            <p>
-              In this guide, you will learn how to create a Monorepo to manage
-              multiple packages with a shared
-            </p>
-          </a>
+          {posts.map(post => (
+            <a key={post.slug} href="/posts">
+              <time>{post.updatedAt}</time>
+              <strong>{post.title}</strong>
+              <p>{post.excerpt}</p>
+            </a>
+          ))}
         </div>
       </main>
     </>
@@ -45,11 +39,27 @@ export default function Posts(): JSX.Element {
 
 export const getStaticProps: GetStaticProps = async ({ previewData }) => {
   const client = createClient({ previewData });
+  const response = await client.getAllByType('post');
 
-  const posts = await client.getAllByType('post');
-  console.log('posts', JSON.stringify(posts, null, 2));
+  const posts = response.map(post => {
+    return {
+      slug: post.uid,
+      title: post.data.title,
+      excerpt: post.data.content.map(item =>
+        item.body.map(i => (i.type === 'paragraph' ? i.text : ''))
+      ),
+      updatedAt: new Date(post.last_publication_date).toLocaleDateString(
+        'pt-BR',
+        {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        }
+      ),
+    };
+  });
 
   return {
-    props: { posts }, // Will be passed to the page component as props
+    props: { posts },
   };
 };
