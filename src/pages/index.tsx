@@ -1,6 +1,7 @@
+import { usePrismicDocumentByUID } from '@prismicio/react';
 import { GetStaticProps } from 'next';
 
-import { getPrismicClient } from '../services/prismic';
+import { createClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
@@ -24,13 +25,6 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
-// export default function Home() {
-//   // TODO
-// }
-
-// export const getStaticProps = async () => {
-//   // const prismic = getPrismicClient();
-//   // const postsResponse = await prismic.query(TODO);
-
-//   // TODO
-// };
+export default function Home({ postsPagination }: HomeProps): any {
+  return <h1 className={styles.title}>ola mundo</h1>;
+}

@@ -1,6 +1,6 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 
-import { getPrismicClient } from '../../services/prismic';
+import { createClient } from '../../../services/prismic';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
@@ -37,9 +37,14 @@ interface PostProps {
 //   // TODO
 // };
 
-// export const getStaticProps = async context => {
-//   const prismic = getPrismicClient();
-//   const response = await prismic.getByUID(TODO);
+export async function getStaticProps({ params, previewData }) {
+  const client = createClient({ previewData });
 
-//   // TODO
-// };
+  const page = await client.getByUID('page', params.uid);
+
+  console.log('page', page);
+
+  return {
+    props: { page },
+  };
+}
